@@ -9,11 +9,19 @@ import useAuth from "../hooks/useAuth";
 import Sidebar from '../components/Sidebar/Sidebar';
 import { db } from "../utils/Firebase";
 
+import { ethers } from "ethers";
+
 
 /*
  * This function returns the first linked account found.
  * If there is no account linked, it will return null.
  */
+const [state, setState] = useState({
+  provide: null,
+  signer: null,
+  contract: null,
+});//for smart contract
+const [account, setAccount] = useState("None"); //for smart contract
 
 function dashboard() {
   const router = useRouter();
@@ -31,9 +39,6 @@ function dashboard() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [cardDetails, setCardDetails] = useState([]);
   const [elections,setElections]=useState([]);
-
-  const getEthereumObject = () =>
-    window.ethereum || window.web3?.currentProvider;
   
     
   useEffect(()=>{
@@ -89,10 +94,21 @@ function dashboard() {
 
   const connectWallet = async () => {
     try {
+      const contractAddress = "0x0C2DE9576F7945cd4B363Bd28b9a47302a211852";
+      const contractABI = abi.abi;
       // Get the provider from web3Modal, which in our case is MetaMask
       // When used for the first time, it prompts the user to connect their wallet
       await getProviderOrSigner();
       setWalletConnected(1);
+      const provide = new ethers.providers.Web3Provider(ethereum);
+          const signer = provide.getSigner();
+          const contract = new ethers.Contract(
+            contractAddress,
+            contractABI,
+            signer
+          );
+          setAccount(account);
+          setState({ provide, signer, contract });
     } catch (err) {
       //console.error(err);
     }
@@ -181,7 +197,7 @@ function dashboard() {
               <div className="flex flex-row justify-around mt-4">
                 {/* Object.keys(people).map((key) => people[key].name) */}
                 {cardDetails.map((can) => (
-                  <Card
+                  <Card state={state}
                     // key={doc.people[key].uId}
                     // id={doc.people[key].uId}
                     // people={doc.people[key]}
