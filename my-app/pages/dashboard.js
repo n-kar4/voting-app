@@ -1,7 +1,7 @@
 import { providers } from "ethers";
 import { collection, doc, getDocs, getFirestore, onSnapshot, query, setDoc } from 'firebase/firestore'
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import React,{ useEffect, useRef, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import Web3Modal from "web3modal";
 import Card from "../components/Card/Card.jsx";
@@ -10,18 +10,14 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import { db } from "../utils/Firebase";
 
 import { ethers } from "ethers";
+import abi from "../contract/new_vote.json";
+import Memos from "../components/Card/Memos.js";
 
 
 /*
  * This function returns the first linked account found.
  * If there is no account linked, it will return null.
  */
-const [state, setState] = useState({
-  provide: null,
-  signer: null,
-  contract: null,
-});//for smart contract
-const [account, setAccount] = useState("None"); //for smart contract
 
 function dashboard() {
   const router = useRouter();
@@ -39,6 +35,13 @@ function dashboard() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [cardDetails, setCardDetails] = useState([]);
   const [elections,setElections]=useState([]);
+
+  const [state, setState] = useState({
+    provide: null,
+    signer: null,
+    contract: null,
+  });
+  const [account, setAccount] = useState("None"); //for smart contract
   
     
   useEffect(()=>{
@@ -96,24 +99,24 @@ function dashboard() {
     try {
       const contractAddress = "0x0C2DE9576F7945cd4B363Bd28b9a47302a211852";
       const contractABI = abi.abi;
-      // Get the provider from web3Modal, which in our case is MetaMask
-      // When used for the first time, it prompts the user to connect their wallet
-      await getProviderOrSigner();
-      setWalletConnected(1);
       const provide = new ethers.providers.Web3Provider(ethereum);
-          const signer = provide.getSigner();
-          const contract = new ethers.Contract(
-            contractAddress,
-            contractABI,
-            signer
-          );
-          setAccount(account);
-          setState({ provide, signer, contract });
-    } catch (err) {
-      //console.error(err);
-    }
-  };
-
+      const signer = provide.getSigner();
+      const contract = new ethers.Contract(
+        contractAddress,
+        contractABI,
+        signer
+        );
+        setAccount(account);
+        setState({ provide, signer, contract });
+      
+        await getProviderOrSigner();
+        setWalletConnected(1);
+        console.log("Transaction is done");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    
   const disconnectWallet = async () => {
     try {
       // Disconnect the wallet
@@ -224,6 +227,7 @@ function dashboard() {
                   />
                   
                 ))}
+                <Memos state={state} />
             </div>
             </div>
           ))}

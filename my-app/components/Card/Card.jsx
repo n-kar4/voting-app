@@ -12,6 +12,7 @@ import constants from '../../constants';
 import { useRouter } from 'next/router';
 
 import { ethers } from "ethers";
+import Memos from "./Memos";
 
 
 function Card({state,walletConnected,people,Name,role,parentCallback,voted,indx,id,eid,Email,Image}) {
@@ -89,12 +90,16 @@ console.log(walletConnected);
     }
   }
  const vot= async()=>{
-  const { contract } = state;
-  console.log(Name, role, contract);
-  const amount = { value: ethers.utils.parseEther("0.001") };
-  const transaction = await contract.buyChai(Name, role, amount);
-  await transaction.wait();
-  console.log("Transaction is done");
+  try{
+    const { contract } = state;
+    console.log(Name, role, contract);
+    const amount = { value: ethers.utils.parseEther("0.0001") };
+    const transaction = await contract.buyChai(Name, role, amount);
+    await transaction.wait();
+    console.log("Transaction is done");
+  }catch(err){
+    console.log(err);
+  }
   
   const docRef = doc(db, "Elections", eid, "Candidates", indx); 
          updateDoc(docRef, {            
@@ -125,7 +130,7 @@ console.log(walletConnected);
               </div>
             </div>
         </div>            
-    
+        
   )
 }
 
