@@ -3,7 +3,7 @@ import { doc, setDoc, updateDoc, arrayRemove,arrayUnion,getDocs } from "@firebas
 import { db} from "../../utils/Firebase";
 import Web3Modal  from 'web3modal'
 //import web3 from '../../constants/web3';
-import { providers, Contract, ethers } from "ethers";
+// import { providers, Contract, ethers } from "ethers";
 import useToggleVote from '../../hooks/useToggleVote'
 import useAuth from "../../hooks/useAuth";
  
@@ -11,8 +11,10 @@ import {VOTE_CONTRACT_ADDRESS,abi} from '../../constants'
 import constants from '../../constants';
 import { useRouter } from 'next/router';
 
+import { ethers } from "ethers";
 
-function Card({walletConnected,people,Name,role,parentCallback,voted,indx,id,eid,Email,Image}) {
+
+function Card({state,walletConnected,people,Name,role,parentCallback,voted,indx,id,eid,Email,Image}) {
   
 //const [voted, setVoted] = useState(0);
  const [loading, setLoading] = useState(false);
@@ -86,13 +88,14 @@ console.log(walletConnected);
         onClick={vot}>Vote</button>   
     }
   }
- const vot=()=>{
-  //   //voting
-  //   const voteDoc=doc(db,"Elections",id);
-  //   updateDoc(voteDoc,{
-  //     [`Elections.people.${Name}`]: count + 1,
-      
-  //   });
+ const vot= async()=>{
+  const { contract } = state;
+  console.log(Name, role, contract);
+  const amount = { value: ethers.utils.parseEther("0.001") };
+  const transaction = await contract.buyChai(Name, role, amount);
+  await transaction.wait();
+  console.log("Transaction is done");
+  
   const docRef = doc(db, "Elections", eid, "Candidates", indx); 
          updateDoc(docRef, {            
             count: voted ? arrayRemove(user?.uid) : arrayUnion(user?.uid),     
